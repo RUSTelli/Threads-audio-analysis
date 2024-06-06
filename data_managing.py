@@ -1,52 +1,60 @@
-import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from consts import CUSTOM_FUNCTIONALITIES
+import pandas as pd
 
-
-def cluster_LGBT_labels(csv_file, output_file):
-    # Load the CSV file into a DataFrame
+def drop_typo_rows(csv_file):
+    # Read the CSV file
     df = pd.read_csv(csv_file)
+    # Filter out rows where 'functionality' column contains the word "spell"
+    df_filtered = df[~df['functionality'].str.contains("spell", case=False, na=False)]
+    # Save the filtered DataFrame back to the same file
+    df_filtered.to_csv(csv_file, index=False)
 
-    # Define a function to replace "gay" or "trans" with "LGBT"
-    def replace_label(label):
-        if 'gay' in label.lower() or 'trans' in label.lower():
-            return 'LGBT'
-        return label
 
-    # Apply the function to the second column
-    df.iloc[:, 1] = df.iloc[:, 1].apply(replace_label)
+def drop_useless_columns(csv_file):
+    # drop all the column which are not "functionality", "text_case" and "target_ident"
+    df = pd.read_csv(csv_file)
+    df = df[["functionality", "test_case", "target_ident"]]
+    df.to_csv(csv_file, index=False) 
 
-    # Save the updated DataFrame to a new CSV file
-    df.to_csv(output_file, index=False)
+
+def update_functionalities(csv_file):
+    # Read the CSV file
+    df = pd.read_csv(csv_file)
+    
+    # Iterate over the rows of the DataFrame
+    for index, row in df.iterrows():
+        # Check each functionality set in CUSTOM_FUNCTIONALITIES
+        for new_func, old_funcs in CUSTOM_FUNCTIONALITIES.items():
+            # If the row's 'functionality' is in the set, replace it
+            if row['functionality'] in old_funcs:
+                df.at[index, 'functionality'] = new_func
+                break  # Stop checking other sets once a match is found
+
+    # Save the updated DataFrame back to the same file
+    df.to_csv(csv_file, index=False)
 
 
 def encode_labels(csv_file):
-    # Load the CSV file into a DataFrame, skipping the first row as it contains headers
-    df = pd.read_csv(csv_file, skiprows=1)
-
-    # Extract labels
-    labels = df.iloc[:, 1]  # Assuming the second column is the label
-
+    df = pd.read_csv(csv_file)
+    labels = df['functionality']    
     # Initialize LabelEncoder
     label_encoder = LabelEncoder()
-
     # Fit and transform labels
     encoded_labels = label_encoder.fit_transform(labels)
-
     # Replace original labels with encoded labels in the DataFrame
-    df.iloc[:, 1] = encoded_labels
-
+    df['functionality'] = encoded_labels
     # Save the DataFrame with encoded labels to a new CSV file
-    df.to_csv("encoded_" + csv_file, index=False)
+    df.to_csv(csv_file, index=False)
 
 
-def split_csv(csv_file, output_folder, test_size=0.2, validation_size=0.1, random_state=42):
+def split_train_val_test(csv_file, test_size=0.2, validation_size=0.1, random_state=42):
     # Load the CSV file into a DataFrame
     df = pd.read_csv(csv_file)
 
-    # Stratified split based on the second column
-    X = df.iloc[:, 0]  # Assuming the first column is the feature
-    y = df.iloc[:, 1]  # Assuming the second column is the label
+    y = df['functionality']
+    X = df['test_case']
 
     # First split the data into training and temp sets
     X_train_temp, X_test, y_train_temp, y_test = train_test_split(X, y, test_size=test_size, stratify=y, random_state=random_state)
@@ -60,13 +68,19 @@ def split_csv(csv_file, output_folder, test_size=0.2, validation_size=0.1, rando
     test_dataset = pd.concat([X_test, y_test], axis=1)
 
     # Write to CSV files
-    training_dataset.to_csv(output_folder + "/training_dataset.csv", index=False)
-    validation_dataset.to_csv(output_folder + "/validation_dataset.csv", index=False)
-    test_dataset.to_csv(output_folder + "/test_dataset.csv", index=False)
+    training_dataset.to_csv("training_dataset.csv", index=False)
+    validation_dataset.to_csv("validation_dataset.csv", index=False)
+    test_dataset.to_csv("test_dataset.csv", index=False)
 
 
 
 
-#encode_labels("synthetic.csv")
-#split_csv("encoded_synthetic.csv", ".")
-cluster_LGBT_labels("hate_lgbt.csv", "output_dataset.csv")
+def data_manipulation_pipeline(dataset):
+    drop_typo_rows(dataset)
+    drop_useless_columns(dataset)
+    update_functionalities(dataset)
+    encode_labels(dataset)
+    split_train_val_test(dataset)
+
+
+data_manipulation_pipeline("test.csv")

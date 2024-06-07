@@ -73,14 +73,10 @@ def split_train_val_test(csv_file, test_size=0.2, validation_size=0.1, random_st
     test_dataset.to_csv("test_dataset.csv", index=False)
 
 
-
-
 def data_manipulation_pipeline(dataset):
     drop_typo_rows(dataset)
     drop_useless_columns(dataset)
     update_functionalities(dataset)
     encode_labels(dataset)
+    # TODO maybe balance_labels(dataset) if highly imbalanced
     split_train_val_test(dataset)
-
-
-data_manipulation_pipeline("test.csv")

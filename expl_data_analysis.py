@@ -1,39 +1,47 @@
 import pandas as pd
 import csv
 
-def print_categorical_stats(input_file):
+
+def max_text_len(csv_file):
+    df = pd.read_csv(csv_file)
+    max_length = df['test_case'].str.len().max()
+    print("Maximum length of text:", max_length)
+
+
+def avg_text_len(csv_file):
+    df = pd.read_csv(csv_file)
+
+    # Calculate the average text length in the "test_case" column
+    avg_len = df['test_case'].str.len().mean()
+    print(f"Average text length: {avg_len}")
+
+
+def count_label_occurrences(csv_file):
     # Read the dataset into a DataFrame
-    df = pd.read_csv(input_file)
+    df = pd.read_csv(csv_file)
     
     # Extract the second column
-    column_data = df.iloc[:, 1]
+    column_data = df['functionality']
     
     # Calculate frequency of each category
     category_counts = column_data.value_counts()
     
     # Print statistics
-    print("Statistics for the second column:")
+    print("functionalities occurences:")
     for category, count in category_counts.items():
         print(f"{category}: {count}")
 
-def max_text_length_in_first_column(csv_file):
-    max_length = 0
-    with open(csv_file, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if len(row) > 0:  # Ensure row has at least one element
-                max_length = max(max_length, len(row[0]))
-    print("Maximum length of text in the first column:", max_length)
+
+def avg_text_len_by_label(csv_file):
+    # group rows by "functionality" column and calculate the average text length in the "test_case" column for each group
+    df = pd.read_csv(csv_file)
+    avg_len_by_label = df.groupby("functionality")["test_case"].apply(lambda x: x.str.len().mean())
+    print("Average text length by label:")
+    print(avg_len_by_label)
 
 
-
-def main():
-    input_file = 'output_dataset.csv'  # Change this to your dataset file path
-    print_categorical_stats(input_file)
-    max_text_length_in_first_column(input_file)
-
-    
-
-
-if __name__ == "__main__":
-    main()
+def eda_pipeline(csv_file):
+    max_text_len(csv_file)
+    avg_text_len(csv_file)
+    avg_text_len_by_label(csv_file)
+    count_label_occurrences(csv_file)

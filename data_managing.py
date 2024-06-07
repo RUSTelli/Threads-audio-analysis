@@ -1,5 +1,6 @@
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from transformers import AutoTokenizer
 from consts import CUSTOM_FUNCTIONALITIES
 import pandas as pd
 
@@ -19,7 +20,7 @@ def drop_useless_columns(csv_file):
     df.to_csv(csv_file, index=False) 
 
 
-def update_functionalities(csv_file):
+def update_labels(csv_file):
     # Read the CSV file
     df = pd.read_csv(csv_file)
     
@@ -45,16 +46,34 @@ def encode_labels(csv_file):
     encoded_labels = label_encoder.fit_transform(labels)
     # Replace original labels with encoded labels in the DataFrame
     df['functionality'] = encoded_labels
+    # code for renaming the columns 'functionality' to 'label' and 'test_case' to 'text'
+    df.rename(columns={'functionality': 'label', 'test_case': 'text'}, inplace=True)
     # Save the DataFrame with encoded labels to a new CSV file
     df.to_csv(csv_file, index=False)
 
+# TODO: fix the tokenizer
+def tokenize_text(csv_file):
+    tokenizer = AutoTokenizer.from_pretrained(
+        "osiria/distilbert-base-italian-cased",
+        #config="custom_tokenizer_config.json",
+    )
+
+    df = pd.read_csv(csv_file)
+    # Tokenize the text column
+    tokenized_text = tokenizer(df['text'].tolist(), padding="max_length", truncation=True)
+    # Replace the original text column with the tokenized text
+    df['text'] = tokenized_text
+    # Save the DataFrame with tokenized text to a new CSV file
+    df.to_csv(csv_file, index=False)
+
+    
 
 def split_train_val_test(csv_file, test_size=0.2, validation_size=0.1, random_state=42):
     # Load the CSV file into a DataFrame
     df = pd.read_csv(csv_file)
 
-    y = df['functionality']
-    X = df['test_case']
+    y = df['label']
+    X = df['text']
 
     # First split the data into training and temp sets
     X_train_temp, X_test, y_train_temp, y_test = train_test_split(X, y, test_size=test_size, stratify=y, random_state=random_state)
@@ -76,7 +95,10 @@ def split_train_val_test(csv_file, test_size=0.2, validation_size=0.1, random_st
 def data_manipulation_pipeline(dataset):
     drop_typo_rows(dataset)
     drop_useless_columns(dataset)
-    update_functionalities(dataset)
+    update_labels(dataset)
     encode_labels(dataset)
-    # TODO maybe balance_labels(dataset) if highly imbalanced
+    tokenize_text(dataset)
     split_train_val_test(dataset)
+
+
+data_manipulation_pipeline("test.csv")

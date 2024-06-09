@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from transformers import AutoTokenizer
 from consts import CUSTOM_FUNCTIONALITIES
+from models.tokenizer import Tokenizer
 import pandas as pd
 
 def drop_typo_rows(csv_file):
@@ -51,23 +51,18 @@ def encode_labels(csv_file):
     # Save the DataFrame with encoded labels to a new CSV file
     df.to_csv(csv_file, index=False)
 
-# TODO: fix the tokenizer
-def tokenize_text(csv_file):
-    tokenizer = AutoTokenizer.from_pretrained(
-        "osiria/distilbert-base-italian-cased",
-        #config="custom_tokenizer_config.json",
-    )
 
+def tokenize_text(csv_file):
+    tokenizer = Tokenizer()
     df = pd.read_csv(csv_file)
     # Tokenize the text column
-    tokenized_text = tokenizer(df['text'].tolist(), padding="max_length", truncation=True)
+    tokenized_text = tokenizer.tokenize(df['text'].tolist())
     # Replace the original text column with the tokenized text
     df['text'] = tokenized_text
     # Save the DataFrame with tokenized text to a new CSV file
     df.to_csv(csv_file, index=False)
 
     
-
 def split_train_val_test(csv_file, test_size=0.2, validation_size=0.1, random_state=42):
     # Load the CSV file into a DataFrame
     df = pd.read_csv(csv_file)

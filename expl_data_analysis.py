@@ -1,6 +1,4 @@
 import pandas as pd
-import csv
-
 
 def max_text_len(csv_file):
     df = pd.read_csv(csv_file)
@@ -45,3 +43,5 @@ def eda_pipeline(csv_file):
     avg_text_len(csv_file)
     avg_text_len_by_label(csv_file)
     count_label_occurrences(csv_file)
+
+eda_pipeline("test.csv")

@@ -7,7 +7,7 @@ class Model():
         self.num_labels = num_labels
         self.model = AutoModelForSequenceClassification.from_pretrained(
             "osiria/distilbert-base-italian-cased", 
-            config="custom_nlp_config.json",
+            config="nlp_config.json",
             num_labels=num_labels
         )
 

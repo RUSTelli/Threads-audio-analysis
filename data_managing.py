@@ -1,5 +1,5 @@
 from datasets import load_dataset
-from consts import SENTIMENT_CLUSTER, HATE_TYPES
+from consts import HATE_TYPES, BINARY_CLUSTER
 from tokenizer import tokenizing_function
 
 def _aggregate_functionalities(row):
@@ -13,7 +13,8 @@ def _aggregate_functionalities(row):
         dict: The modified row with aggregated functionality.
     """
     functionality = row['functionality']
-    for sentiment, functionalities in SENTIMENT_CLUSTER.items():
+    # TODO restor to SENTIMENT_CLUSTER.items()
+    for sentiment, functionalities in BINARY_CLUSTER.items():
         if functionality in functionalities:
             row['functionality'] = sentiment
     return row
@@ -34,7 +35,7 @@ def _aggregate_hate_types(row):
             row['target_ident'] = hate_type if target_identity in targets else 'GENERIC'
     return row
 
-def _rename_columns(dataset, classification_type="ternary"):
+def _rename_columns(dataset, classification_type="sentiment"):
     """
     Renames the columns of the dataset.
 
@@ -46,22 +47,25 @@ def _rename_columns(dataset, classification_type="ternary"):
         Dataset: The dataset with renamed columns.
     """
     dataset = dataset.rename_column("test_case", "text")
-    if classification_type == "ternary":
+    if classification_type == "sentiment":
         dataset = dataset.rename_column("functionality", "label")
     elif classification_type == "multi":
         dataset = dataset.rename_column("target_ident", "label")
     return dataset
 
 
-def data_pipeline(classification_type="ternary"):
+def data_pipeline(classification_type="sentiment"):
     # load dataset
     dataset = load_dataset("Paul/hatecheck-italian", split="test")
     # drop rows with typos in the text
     dataset = dataset.filter(lambda example: "spell" not in example["functionality"])
     # drop columns that are not needed
     dataset = dataset.select_columns(["functionality", "test_case", "target_ident"])
-    # aggregate functionalities into sentiments (hateful, neutral, positive)
+    # aggregate functionalities into sentiments (hateful, non_hateful)
     dataset = dataset.map(_aggregate_functionalities)
+
+    print(dataset["functionality"])
+
     # aggregate hate types
     dataset = dataset.map(_aggregate_hate_types)
     # tokenize text
@@ -74,3 +78,7 @@ def data_pipeline(classification_type="ternary"):
     dataset = dataset.train_test_split(test_size=0.2, seed=42, stratify_by_column="label")
 
     return dataset
+
+
+# dataset = data_pipeline(classification_type="sentiment")
+# print(dataset["train"]["label"])

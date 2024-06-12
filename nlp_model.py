@@ -5,7 +5,7 @@ from tokenizer import TOKENIZER
 from consts import LABEL2ID, ID2LABEL
 
 class TextClassifier():
-    def __init__(self, num_labels=3, output_dir="sentiment_output"):
+    def __init__(self, num_labels=2, output_dir="sentiment_output"):
         self.tokenizer  = TOKENIZER
         self.num_labels = num_labels
         self.output_dir = output_dir
@@ -20,6 +20,7 @@ class TextClassifier():
 
     def train(self, dataset, epochs=2):
         def _compute_metrics(eval_pred):
+            # TODO manage multi-label metrics
             metrics        = evaluate.combine(["accuracy", "f1", "precision", "recall"])
             logits, labels = eval_pred
             predictions    = np.argmax(logits, axis=-1)

@@ -63,9 +63,6 @@ def data_pipeline(classification_type="sentiment"):
     dataset = dataset.select_columns(["functionality", "test_case", "target_ident"])
     # aggregate functionalities into sentiments (hateful, non_hateful)
     dataset = dataset.map(_aggregate_functionalities)
-
-    print(dataset["functionality"])
-
     # aggregate hate types
     dataset = dataset.map(_aggregate_hate_types)
     # tokenize text
@@ -78,7 +75,3 @@ def data_pipeline(classification_type="sentiment"):
     dataset = dataset.train_test_split(test_size=0.2, seed=42, stratify_by_column="label")
 
     return dataset
-
-
-# dataset = data_pipeline(classification_type="sentiment")
-# print(dataset["train"]["label"])

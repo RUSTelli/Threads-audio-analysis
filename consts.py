@@ -1,3 +1,50 @@
+SENTIMENT_CLUSTER = {
+    "HATEFUL" : { 
+        "threat_dir_h",
+        "threat_norm_h",
+        "target_obj_nh",
+        "target_indiv_nh",
+        "target_group_nh",
+        "derog_neg_emote_h",
+        "derog_neg_attrib_h",
+        "derog_dehum_h",
+        "derog_impl_h",
+        "slur_h",
+        "ref_subs_clause_h",
+        "ref_subs_sent_h",
+        "negate_pos_h",
+        "phrase_question_h",
+        "phrase_opinion_h",
+        "profanity_h",
+    },
+    "NEUTRAL" : {
+        "profanity_nh",
+        "ident_neutral_nh",
+    },
+    "POSITIVE" : {
+        "counter_quote_nh",
+        "counter_ref_nh",
+        "negate_neg_nh",
+        "ident_pos_nh",
+    },
+}
+
+HATE_TYPES = {
+    "LGBT" : {"trans people", "gay people"},
+    "GENERIC" : {},
+    "RELIGIOUS" :{"Muslims"},
+    "RACIAL" : {"black people"},
+    "SEXUAL" : {"women"},
+    "DISABILITY" : {"disabled people"},
+    "XENOPHOBIC" : {"immigrants"},
+}
+
+ID2LABEL = {0: "NEGATIVE", 1: "NEUTRAL", 2 : "POSITIVE"}
+
+LABEL2ID = {"NEGATIVE": 0, "NEUTRAL" : 1,"POSITIVE": 2}
+
+
+'''
 MENACE = {
     "threat_dir_h",
     "threat_norm_h",
@@ -27,7 +74,7 @@ VOLGARITY = {
     "profanity_nh",
 }
 
-NEUTRAL = {
+NEUTRALITY = {
     "ident_neutral_nh",
 }
 
@@ -44,21 +91,12 @@ SUPPORTING = {
 POSITIVE = {
     "ident_pos_nh",
 }
-CUSTOM_FUNCTIONALITIES = {
-    "MENACE" : MENACE,
-    "GENERIC_HATE" : GENERIC_HATE,
-    "CATEGORY_HATE" : CATEGORY_HATE,
-    "VOLGARITY" : VOLGARITY,
-    "NEUTRAL" : NEUTRAL,
-    "ANTI_HATE" : ANTI_HATE,
-    "SUPPORTING" : SUPPORTING,
-    "POSITIVE" : POSITIVE,
-}
 
-# atm this is not programmed, but let's keep it here for a 2 class classification.
-'''
 SENTIMENT_CLUSTER = {
-    "HATE" : [MENACE, GENERIC_HATE, CATEGORY_HATE,],
+    "HATEFUL" : [MENACE, GENERIC_HATE, CATEGORY_HATE,],
+    "NEUTRAL" : [VOLGARITY, NEUTRALITY,],
     "POSITIVE" : [ANTI_HATE, SUPPORTING, POSITIVE,],
 }
 '''
+
+

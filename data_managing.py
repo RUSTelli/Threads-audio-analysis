@@ -1,99 +1,76 @@
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from consts import CUSTOM_FUNCTIONALITIES
-from models.tokenizer import Tokenizer
-import pandas as pd
+from datasets import load_dataset
+from consts import SENTIMENT_CLUSTER, HATE_TYPES
+from tokenizer import tokenizing_function
 
-def drop_typo_rows(csv_file):
-    # Read the CSV file
-    df = pd.read_csv(csv_file)
-    # Filter out rows where 'functionality' column contains the word "spell"
-    df_filtered = df[~df['functionality'].str.contains("spell", case=False, na=False)]
-    # Save the filtered DataFrame back to the same file
-    df_filtered.to_csv(csv_file, index=False)
+def _aggregate_functionalities(row):
+    """
+    Aggregates the functionalities into sentiments.
 
+    Args:
+        row (dict): The row of the dataset.
 
-def drop_useless_columns(csv_file):
-    # drop all the column which are not "functionality", "text_case" and "target_ident"
-    df = pd.read_csv(csv_file)
-    df = df[["functionality", "test_case", "target_ident"]]
-    df.to_csv(csv_file, index=False) 
+    Returns:
+        dict: The modified row with aggregated functionality.
+    """
+    functionality = row['functionality']
+    for sentiment, functionalities in SENTIMENT_CLUSTER.items():
+        if functionality in functionalities:
+            row['functionality'] = sentiment
+    return row
 
+def _aggregate_hate_types(row):
+    """
+    Aggregates the hate types.
 
-def update_labels(csv_file):
-    # Read the CSV file
-    df = pd.read_csv(csv_file)
-    
-    # Iterate over the rows of the DataFrame
-    for index, row in df.iterrows():
-        # Check each functionality set in CUSTOM_FUNCTIONALITIES
-        for new_func, old_funcs in CUSTOM_FUNCTIONALITIES.items():
-            # If the row's 'functionality' is in the set, replace it
-            if row['functionality'] in old_funcs:
-                df.at[index, 'functionality'] = new_func
-                break  # Stop checking other sets once a match is found
+    Args:
+        row (dict): The row of the dataset.
 
-    # Save the updated DataFrame back to the same file
-    df.to_csv(csv_file, index=False)
+    Returns:
+        dict: The modified row with aggregated hate types.
+    """
+    if row['functionality'] == 'HATEFUL':
+        target_identity = row['target_ident']
+        for hate_type, targets in HATE_TYPES.items():
+            row['target_ident'] = hate_type if target_identity in targets else 'GENERIC'
+    return row
 
+def _rename_columns(dataset, classification_type="ternary"):
+    """
+    Renames the columns of the dataset.
 
-def encode_labels(csv_file):
-    df = pd.read_csv(csv_file)
-    labels = df['functionality']    
-    # Initialize LabelEncoder
-    label_encoder = LabelEncoder()
-    # Fit and transform labels
-    encoded_labels = label_encoder.fit_transform(labels)
-    # Replace original labels with encoded labels in the DataFrame
-    df['functionality'] = encoded_labels
-    # code for renaming the columns 'functionality' to 'label' and 'test_case' to 'text'
-    df.rename(columns={'functionality': 'label', 'test_case': 'text'}, inplace=True)
-    # Save the DataFrame with encoded labels to a new CSV file
-    df.to_csv(csv_file, index=False)
+    Args:
+        dataset (Dataset): The dataset to rename columns.
+        classification_type (str): The type of classification.
 
-
-def tokenize_text(csv_file):
-    tokenizer = Tokenizer()
-    df = pd.read_csv(csv_file)
-    # Tokenize the text column
-    tokenized_text = tokenizer.tokenize(df['text'].tolist())
-    # Replace the original text column with the tokenized text
-    df['text'] = tokenized_text
-    # Save the DataFrame with tokenized text to a new CSV file
-    df.to_csv(csv_file, index=False)
-
-    
-def split_train_val_test(csv_file, test_size=0.2, validation_size=0.1, random_state=42):
-    # Load the CSV file into a DataFrame
-    df = pd.read_csv(csv_file)
-
-    y = df['label']
-    X = df['text']
-
-    # First split the data into training and temp sets
-    X_train_temp, X_test, y_train_temp, y_test = train_test_split(X, y, test_size=test_size, stratify=y, random_state=random_state)
-
-    # Then split the temp set into training and validation sets
-    X_train, X_val, y_train, y_val = train_test_split(X_train_temp, y_train_temp, test_size=validation_size/(1-test_size), stratify=y_train_temp, random_state=random_state)
-
-    # Concatenate features and labels for each set
-    training_dataset = pd.concat([X_train, y_train], axis=1)
-    validation_dataset = pd.concat([X_val, y_val], axis=1)
-    test_dataset = pd.concat([X_test, y_test], axis=1)
-
-    # Write to CSV files
-    training_dataset.to_csv("training_dataset.csv", index=False)
-    validation_dataset.to_csv("validation_dataset.csv", index=False)
-    test_dataset.to_csv("test_dataset.csv", index=False)
+    Returns:
+        Dataset: The dataset with renamed columns.
+    """
+    dataset = dataset.rename_column("test_case", "text")
+    if classification_type == "ternary":
+        dataset = dataset.rename_column("functionality", "label")
+    elif classification_type == "multi":
+        dataset = dataset.rename_column("target_ident", "label")
+    return dataset
 
 
-def data_manipulation_pipeline(dataset):
-    drop_typo_rows(dataset)
-    drop_useless_columns(dataset)
-    update_labels(dataset)
-    encode_labels(dataset)
-    tokenize_text(dataset)
-    split_train_val_test(dataset)
+def data_pipeline(classification_type="ternary"):
+    # load dataset
+    dataset = load_dataset("Paul/hatecheck-italian", split="test")
+    # drop rows with typos in the text
+    dataset = dataset.filter(lambda example: "spell" not in example["functionality"])
+    # drop columns that are not needed
+    dataset = dataset.select_columns(["functionality", "test_case", "target_ident"])
+    # aggregate functionalities into sentiments (hateful, neutral, positive)
+    dataset = dataset.map(_aggregate_functionalities)
+    # aggregate hate types
+    dataset = dataset.map(_aggregate_hate_types)
+    # tokenize text
+    dataset = dataset.map(tokenizing_function)
+    # rename columns
+    dataset = _rename_columns(dataset, classification_type=classification_type)
+    # encode labels
+    dataset = dataset.class_encode_column("label")
+    # split the dataset into training, validation and test with a fixed seed of 42
+    dataset = dataset.train_test_split(test_size=0.2, seed=42, stratify_by_column="label")
 
-
-data_manipulation_pipeline("test.csv")
+    return dataset

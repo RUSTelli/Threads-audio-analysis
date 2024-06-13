@@ -13,7 +13,6 @@ def _aggregate_functionalities(row):
         dict: The modified row with aggregated functionality.
     """
     functionality = row['functionality']
-    # TODO restor to SENTIMENT_CLUSTER.items()
     for sentiment, functionalities in BINARY_CLUSTER.items():
         if functionality in functionalities:
             row['functionality'] = sentiment
@@ -29,10 +28,11 @@ def _aggregate_hate_types(row):
     Returns:
         dict: The modified row with aggregated hate types.
     """
-    if row['functionality'] == 'HATEFUL':
-        target_identity = row['target_ident']
-        for hate_type, targets in HATE_TYPES.items():
-            row['target_ident'] = hate_type if target_identity in targets else 'GENERIC'
+    target_identity = row['target_ident']
+    row['target_ident'] = 'GENERIC'  
+    for hate_type, targets in HATE_TYPES.items():
+        if target_identity in targets:
+            row['target_ident'] = hate_type
     return row
 
 def _rename_columns(dataset, classification_type="sentiment"):
@@ -63,8 +63,12 @@ def data_pipeline(classification_type="sentiment"):
     dataset = dataset.select_columns(["functionality", "test_case", "target_ident"])
     # aggregate functionalities into sentiments (hateful, non_hateful)
     dataset = dataset.map(_aggregate_functionalities)
-    # aggregate hate types
-    dataset = dataset.map(_aggregate_hate_types)
+    # multi class classification operaton
+    if classification_type == "multi":
+        #drop NON_HATEFUL rows 
+        dataset = dataset.filter(lambda example: example["functionality"] == "HATEFUL")
+        # aggregate hate types
+        dataset = dataset.map(_aggregate_hate_types)
     # tokenize text
     dataset = dataset.map(tokenizing_function)
     # rename columns

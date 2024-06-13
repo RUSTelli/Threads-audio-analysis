@@ -8,5 +8,5 @@ sentiment_dataset   = data_pipeline()
 sentiment_classifier = SentimentClassifier()
 # #hate_classifier      = TextClassifier(num_labels=7, output_dir="hate_output")
 
-sentiment_classifier.train(sentiment_dataset, epochs=4, batch_size=64)
+sentiment_classifier.train(sentiment_dataset, epochs=3, batch_size=128)
 # #hate_classifier.train(hate_dataset)

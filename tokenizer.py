@@ -1,11 +1,24 @@
 from transformers import AutoTokenizer
+from functools import partial
+from consts import TOKENIZER_CONFIG, MODELS
 
-TOKENIZER = AutoTokenizer.from_pretrained(
-    "osiria/distilbert-base-italian-cased",
-    config="configs/tokenizer_config.json",
-)
 
-def tokenizing_function(examples):
+def get_tokenizer(language:str):
+    """
+    Returns the tokenizer used in the NLP models.
+
+    Returns:
+        AutoTokenizer: The tokenizer used in the NLP models.
+    """
+    tokenizer_path = MODELS[language]
+    tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer_path,
+        config=TOKENIZER_CONFIG,
+    )
+    return tokenizer
+
+
+def generic_tokenizing_function(tokenizer: AutoTokenizer, examples):
     """
     Tokenizes the test_case column in the examples dataset.
 
@@ -15,4 +28,16 @@ def tokenizing_function(examples):
     Returns:
         Dataset: The dataset with the tokenized test_case column.
     """
-    return TOKENIZER(examples["test_case"], truncation=True,  padding='max_length', max_length=150)
+
+    return tokenizer(examples["test_case"], truncation=True,  padding='max_length', max_length=150)
+
+
+def get_tokenizing_function(tokenizer: AutoTokenizer):
+    """
+    Returns the tokenizing function used in the NLP models.
+
+    Returns:
+        function: The tokenizing function used in the NLP models.
+    """
+    tokenizer = get_tokenizer(tokenizer)
+    return partial(generic_tokenizing_function, tokenizer)

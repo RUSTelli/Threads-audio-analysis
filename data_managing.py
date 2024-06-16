@@ -1,6 +1,6 @@
 from datasets import load_dataset
-from consts import HATE_TYPES, BINARY_CLUSTER
-from tokenizer import tokenizing_function
+from consts import HATE_TYPES, BINARY_CLUSTER, DATASETS, MODELS
+from tokenizer import get_tokenizing_function
 
 def _aggregate_functionalities(row):
     """
@@ -53,25 +53,25 @@ def _rename_columns(dataset, classification_type="sentiment"):
         dataset = dataset.rename_column("target_ident", "label")
     return dataset
 
-
-def data_pipeline(classification_type="sentiment"):
+def data_pipeline(classification_type="sentiment", language="it"):
     # load dataset
-    dataset = load_dataset("Paul/hatecheck-italian", split="test")
+    dataset = load_dataset(DATASETS[language], split="test")
     # drop rows with typos in the text
     dataset = dataset.filter(lambda example: "spell" not in example["functionality"])
-    # drop columns that are not needed
+    # keep only the necessary columns
     dataset = dataset.select_columns(["functionality", "test_case", "target_ident"])
     # aggregate functionalities into sentiments (hateful, non_hateful)
     dataset = dataset.map(_aggregate_functionalities)
-    # multi class classification operaton
+    # tokenize text
+    tokenizing_function = get_tokenizing_function(language)
+    dataset = dataset.map(tokenizing_function)
+    # multi-class classification operations
     if classification_type == "multi":
         #drop NON_HATEFUL rows 
         dataset = dataset.filter(lambda example: example["functionality"] == "HATEFUL")
         # aggregate hate types
         dataset = dataset.map(_aggregate_hate_types)
-    # tokenize text
-    dataset = dataset.map(tokenizing_function)
-    # rename columns
+    # rename columns    
     dataset = _rename_columns(dataset, classification_type=classification_type)
     # encode labels
     dataset = dataset.class_encode_column("label")

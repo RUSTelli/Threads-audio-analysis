@@ -1,3 +1,21 @@
+import os
+
+DATASETS = {
+    "it" : "Paul/hatecheck-italian",
+    "en" : "Paul/hatecheck",
+    "fr" : "Paul/hatecheck-french",
+    "es" : "Paul/hatecheck-spanish",
+    "de" : "Paul/hatecheck-german",
+}
+
+MODELS = {
+    "it" : "Geotrend/distilbert-base-it-cased",
+    "en" : "Geotrend/distilbert-base-en-cased",
+    "fr" : "Geotrend/distilbert-base-fr-cased",
+    "es" : "Geotrend/distilbert-base-es-cased",
+    "de" : "Geotrend/distilbert-base-de-cased",
+}
+
 BINARY_CLUSTER = {
     "HATEFUL" : {
         "threat_dir_h",
@@ -68,4 +86,4 @@ LABEL2ID_M = {
     "XENOPHOBIC" : 6,
 }
 
-
+TOKENIZER_CONFIG = os.path.join("configs", "tokenizer_config.json")

@@ -1,22 +1,21 @@
-from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments
+from transformers import AutoModelForSequenceClassification,Trainer, TrainingArguments
 import numpy as np
 import evaluate
-from tokenizer import TOKENIZER
 from consts import LABEL2ID_B, ID2LABEL_B, LABEL2ID_M, ID2LABEL_M
+from tokenizer import get_tokenizer
 
 class SentimentClassifier():
-    def __init__(self):
-        self.tokenizer  = TOKENIZER
+    def __init__(self, model_name:str):
+        self.tokenizer = get_tokenizer(model_name)
         self.num_labels = 2
-        self.output_dir = "sentiment_output"
+        self.output_dir = f"sentiment_{model_name}"
         self.model      = AutoModelForSequenceClassification.from_pretrained(
-            "osiria/distilbert-base-italian-cased", 
+            model_name,
             config="nlp_config.json",
             num_labels=self.num_labels,
             id2label=ID2LABEL_B,
             label2id=LABEL2ID_B,
         )
-
 
     def train(self, dataset, epochs=2, batch_size=16):
         def _compute_metrics(eval_pred):
@@ -53,12 +52,12 @@ class SentimentClassifier():
         pass
 
 class HateClassifier():
-    def __init__(self):
+    def __init__(self, model_name:str):
         self.tokenizer  = TOKENIZER
         self.num_labels = 7
-        self.output_dir = "hate_output"
+        self.output_dir = f"hate_{model_name}"
         self.model      = AutoModelForSequenceClassification.from_pretrained(
-            "osiria/distilbert-base-italian-cased", 
+            model_name, 
             config="nlp_config.json",
             num_labels=self.num_labels,
             id2label=ID2LABEL_M,

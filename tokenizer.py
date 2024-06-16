@@ -3,14 +3,14 @@ from functools import partial
 from consts import TOKENIZER_CONFIG, MODELS
 
 
-def get_tokenizer(language:str):
+def get_tokenizer(language:str, multi_language_model = False):
     """
     Returns the tokenizer used in the NLP models.
 
     Returns:
         AutoTokenizer: The tokenizer used in the NLP models.
     """
-    tokenizer_path = MODELS[language]
+    tokenizer_path = MODELS[language] if not multi_language_model else MODELS["multi"]
     tokenizer = AutoTokenizer.from_pretrained(
         tokenizer_path,
         config=TOKENIZER_CONFIG,
@@ -32,12 +32,12 @@ def generic_tokenizing_function(tokenizer: AutoTokenizer, examples):
     return tokenizer(examples["test_case"], truncation=True,  padding='max_length', max_length=150)
 
 
-def get_tokenizing_function(tokenizer: AutoTokenizer):
+def get_tokenizing_function(language: str, multi_language_model = False):
     """
     Returns the tokenizing function used in the NLP models.
 
     Returns:
         function: The tokenizing function used in the NLP models.
     """
-    tokenizer = get_tokenizer(tokenizer)
+    tokenizer = get_tokenizer(language, multi_language_model)
     return partial(generic_tokenizing_function, tokenizer)

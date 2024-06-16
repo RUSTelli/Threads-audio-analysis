@@ -14,6 +14,17 @@ MODELS = {
     "fr" : "Geotrend/distilbert-base-fr-cased",
     "es" : "Geotrend/distilbert-base-es-cased",
     "de" : "Geotrend/distilbert-base-de-cased",
+    "multi"  : "distilbert/distilbert-base-multilingual-cased"
+}
+
+TOKENIZER_CONFIG = os.path.join("configs", "tokenizer_config.json")
+
+MODEL_CONFIGS = {
+    "it" : os.path.join("configs", "it_model_config.json"),
+    "en" : os.path.join("configs", "en_model_config.json"),
+    "fr" : os.path.join("configs", "fr_model_config.json"),
+    "es" : os.path.join("configs", "es_model_config.json"),
+    "de" : os.path.join("configs", "de_model_config.json"),
 }
 
 BINARY_CLUSTER = {
@@ -85,5 +96,3 @@ LABEL2ID_M = {
     "DISABILITY" : 5,
     "XENOPHOBIC" : 6,
 }
-
-TOKENIZER_CONFIG = os.path.join("configs", "tokenizer_config.json")

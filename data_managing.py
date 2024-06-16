@@ -1,5 +1,5 @@
 from datasets import load_dataset
-from consts import HATE_TYPES, BINARY_CLUSTER, DATASETS, MODELS
+from consts import HATE_TYPES, BINARY_CLUSTER, DATASETS
 from tokenizer import get_tokenizing_function
 
 def _aggregate_functionalities(row):
@@ -53,7 +53,7 @@ def _rename_columns(dataset, classification_type="sentiment"):
         dataset = dataset.rename_column("target_ident", "label")
     return dataset
 
-def data_pipeline(classification_type="sentiment", language="it"):
+def data_pipeline(classification_type="sentiment", language="it", multi_language=False):
     # load dataset
     dataset = load_dataset(DATASETS[language], split="test")
     # drop rows with typos in the text
@@ -63,7 +63,7 @@ def data_pipeline(classification_type="sentiment", language="it"):
     # aggregate functionalities into sentiments (hateful, non_hateful)
     dataset = dataset.map(_aggregate_functionalities)
     # tokenize text
-    tokenizing_function = get_tokenizing_function(language)
+    tokenizing_function = get_tokenizing_function(language, multi_language)
     dataset = dataset.map(tokenizing_function)
     # multi-class classification operations
     if classification_type == "multi":

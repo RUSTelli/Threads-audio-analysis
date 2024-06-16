@@ -2,7 +2,17 @@ from data_managing import data_pipeline
 from nlp_models import SentimentClassifier
 from consts import DATASETS, MODELS
 
+# train each language-specific model on sentiment classification
 for language in DATASETS.keys():
-    dataset = data_pipeline(classification_type="sentiment", language=language)
-    model = SentimentClassifier(MODELS[language])
-    model.train(dataset, epochs=4, batch_size=64)
+    dataset = data_pipeline(classification_type="sentiment", language=language, multi_language=False)
+    model_path = MODELS[language]
+    lang_specific_model = SentimentClassifier(model_path, language)
+    lang_specific_model.train(dataset, epochs=3, batch_size=64)
+
+# TODO: 100% broken COMMENT THESE LINESE BEFOTE RUNNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# train the multi-language model, on each language, on sentiment classification
+for language in DATASETS.keys():
+    dataset = data_pipeline(classification_type="sentiment", language=language, multi_language=True)
+    model_path = MODELS["m"]
+    multi_lang_model = SentimentClassifier(model_path, language)
+    lang_specific_model.train(dataset, epochs=3, batch_size=64)

@@ -1,4 +1,4 @@
-from datasets import load_dataset
+from datasets import load_dataset, disable_caching
 from consts import HATE_TYPES, BINARY_CLUSTER, DATASETS
 from tokenizer import get_tokenizing_function
 
@@ -54,12 +54,15 @@ def _rename_columns(dataset, classification_type="sentiment"):
     return dataset
 
 def data_pipeline(classification_type="sentiment", language="it", multi_language=False):
+    disable_caching()
     # load dataset
     dataset = load_dataset(DATASETS[language], split="test")
     # drop rows with typos in the text
     dataset = dataset.filter(lambda example: "spell" not in example["functionality"])
     # keep only the necessary columns
     dataset = dataset.select_columns(["functionality", "test_case", "target_ident"])
+    # remove rows which functionality is "slur_reclaimed_nh" or "slur_homonym_nh"
+    dataset = dataset.filter(lambda example: example["functionality"] not in ["slur_reclaimed_nh", "slur_homonym_nh"])
     # aggregate functionalities into sentiments (hateful, non_hateful)
     dataset = dataset.map(_aggregate_functionalities)
     # tokenize text

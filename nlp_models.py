@@ -3,12 +3,13 @@ import numpy as np
 import evaluate
 from consts import LABEL2ID_B, ID2LABEL_B, LABEL2ID_M, ID2LABEL_M, MODEL_CONFIGS
 from tokenizer import get_tokenizer
+import os
 
 class SentimentClassifier():
-    def __init__(self, model_path:str, language:str):
-        self.tokenizer  = get_tokenizer(model_path)
+    def __init__(self, model_path:str, language:str, multi_lang_model=False):
+        self.tokenizer  = get_tokenizer(language, multi_lang_model)
         self.num_labels = 2
-        self.output_dir = f"sentiment_{language}"
+        self.output_dir = os.path.join("sentiment", model_path)
         self.model      = AutoModelForSequenceClassification.from_pretrained(
             model_path,
             # TODO: implement a way of getting the config for multi-language model

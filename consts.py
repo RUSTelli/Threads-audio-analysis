@@ -19,12 +19,14 @@ MODELS = {
 
 TOKENIZER_CONFIG = os.path.join("configs", "tokenizer_config.json")
 
+
 MODEL_CONFIGS = {
-    "it" : os.path.join("configs", "it_model_config.json"),
-    "en" : os.path.join("configs", "en_model_config.json"),
-    "fr" : os.path.join("configs", "fr_model_config.json"),
-    "es" : os.path.join("configs", "es_model_config.json"),
-    "de" : os.path.join("configs", "de_model_config.json"),
+    "Geotrend/distilbert-base-it-cased" : os.path.join("configs", "it_model_config.json"), 
+    "Geotrend/distilbert-base-en-cased" : os.path.join("configs", "en_model_config.json"),
+    "Geotrend/distilbert-base-fr-cased" : os.path.join("configs", "fr_model_config.json"),
+    "Geotrend/distilbert-base-es-cased" : os.path.join("configs", "es_model_config.json"),
+    "Geotrend/distilbert-base-de-cased" : os.path.join("configs", "de_model_config.json"),
+    "distilbert/distilbert-base-multilingual-cased" : os.path.join("configs", "multi_model_config.json"),
 }
 
 BINARY_CLUSTER = {

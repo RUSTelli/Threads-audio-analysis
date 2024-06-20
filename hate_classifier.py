@@ -1,20 +1,20 @@
 from transformers import AutoModelForSequenceClassification,Trainer, TrainingArguments
 import numpy as np
 import evaluate
-from consts import LABEL2ID_B, ID2LABEL_B, LABEL2ID_M, ID2LABEL_M, MODEL_CONFIGS
+from consts import LABEL2ID_M, ID2LABEL_M, MODEL_CONFIGS
 from tokenizer import get_tokenizer
 import os
 
-class SentimentClassifier():
+class HateClassifier():
     def __init__(self, model_path:str, language:str, is_multi_lang_model=False):
         self.tokenizer  = get_tokenizer(language, is_multi_lang_model)
-        self.output_dir = os.path.join("sentiment", language, model_path)
+        self.output_dir = os.path.join("hate", language, model_path)
         self.model      = AutoModelForSequenceClassification.from_pretrained(
             model_path,
             config=MODEL_CONFIGS[model_path],
-            num_labels=2,
-            id2label=ID2LABEL_B,
-            label2id=LABEL2ID_B,
+            num_labels=7,
+            id2label=ID2LABEL_M,
+            label2id=LABEL2ID_M,
         )
 
     def train(self, dataset, epochs=2, batch_size=16):

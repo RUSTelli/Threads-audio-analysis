@@ -53,7 +53,7 @@ def _rename_columns(dataset, classification_type="sentiment"):
         dataset = dataset.rename_column("target_ident", "label")
     return dataset
 
-def data_pipeline(classification_type="sentiment", language="it", multi_language=False):
+def data_pipeline(classification_type="sentiment", language="it", is_multi_lang_model=False):
     disable_caching()
     # load dataset
     dataset = load_dataset(DATASETS[language], split="test")
@@ -66,7 +66,7 @@ def data_pipeline(classification_type="sentiment", language="it", multi_language
     # aggregate functionalities into sentiments (hateful, non_hateful)
     dataset = dataset.map(_aggregate_functionalities)
     # tokenize text
-    tokenizing_function = get_tokenizing_function(language, multi_language)
+    tokenizing_function = get_tokenizing_function(language, is_multi_lang_model)
     dataset = dataset.map(tokenizing_function)
     # multi-class classification operations
     if classification_type == "multi":

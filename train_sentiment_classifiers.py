@@ -1,5 +1,5 @@
 from data_managing import data_pipeline
-from nlp_models import SentimentClassifier
+from sentiment_classifier import SentimentClassifier
 from consts import DATASETS, MODELS
 
 #train each language-specific model on sentiment classification

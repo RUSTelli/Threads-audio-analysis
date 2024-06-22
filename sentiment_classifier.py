@@ -1,7 +1,7 @@
 from transformers import AutoModelForSequenceClassification,Trainer, TrainingArguments
 import numpy as np
 import evaluate
-from consts import LABEL2ID_B, ID2LABEL_B, LABEL2ID_M, ID2LABEL_M, MODEL_CONFIGS
+from consts import LABEL2ID_B, ID2LABEL_B, MODEL_CONFIGS
 from tokenizer import get_tokenizer
 import os
 

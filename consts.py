@@ -60,7 +60,8 @@ BINARY_CLUSTER = {
 }
 
 HATE_TYPES = {
-    "LGBT" : {"trans people", "gay people"},
+    "TRANSPHOBIC" : {"trans people"},
+    "HOMOPHOBIC" : {"gay people"},
     "GENERIC" : {},
     "RELIGIOUS" :{"Muslims", "jews"},
     "RACIAL" : {"black people"},
@@ -80,21 +81,23 @@ LABEL2ID_B = {
 }
 
 ID2LABEL_M = { 
-    0 : "LGBT", 
+    0 : "HOMOPHOBIC", 
     1 : "GENERIC",
     2 : "RELIGIOUS",
     3 : "RACIAL",
     4 : "MISOGENIC",
     5 : "DISABILITY",
     6 : "XENOPHOBIC",
+    7 : "TRANSOPHOBIC",
 }
 
 LABEL2ID_M = {
-    "LGBT" : 0, 
+    "HOMOPHOBIC" : 0, 
     "GENERIC" : 1,
     "RELIGIOUS" : 2,
     "RACIAL" : 3,
     "MISOGENIC" : 4,
     "DISABILITY" : 5,
     "XENOPHOBIC" : 6,
+    "TRANSOPHOBIC" : 7,
 }

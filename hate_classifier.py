@@ -1,9 +1,8 @@
 from transformers import AutoModelForSequenceClassification,Trainer, TrainingArguments
-import numpy as np
-import evaluate
 from consts import LABEL2ID_M, ID2LABEL_M, MODEL_CONFIGS
 from tokenizer import get_tokenizer
 import os
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 class HateClassifier():
     def __init__(self, model_path:str, language:str, is_multi_lang_model=False):
@@ -12,18 +11,31 @@ class HateClassifier():
         self.model      = AutoModelForSequenceClassification.from_pretrained(
             model_path,
             config=MODEL_CONFIGS[model_path],
-            num_labels=7,
+            num_labels=8,
             id2label=ID2LABEL_M,
             label2id=LABEL2ID_M,
         )
 
     def train(self, dataset, epochs=2, batch_size=16):
-        def _compute_metrics(eval_pred):
-            metrics        = evaluate.combine(["accuracy", "f1", "precision", "recall"])
-            logits, labels = eval_pred
-            predictions    = np.argmax(logits, axis=-1)
-            return metrics.compute(predictions=predictions, references=labels)
-    
+        def _compute_metrics(pred):
+            labels = pred.label_ids
+            preds = pred.predictions.argmax(-1)
+            
+            # Calculate accuracy
+            accuracy = accuracy_score(labels, preds)
+
+            # Calculate precision, recall, and F1-score
+            precision = precision_score(labels, preds, average='micro')
+            recall = recall_score(labels, preds, average='micro')
+            f1 = f1_score(labels, preds, average='micro')
+            
+            return {
+                'accuracy': accuracy,
+                'precision': precision,
+                'recall': recall,
+                'f1': f1
+            }
+
         training_args = TrainingArguments(
             output_dir=self.output_dir,
             learning_rate=2e-5,

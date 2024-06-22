@@ -49,7 +49,7 @@ def _rename_columns(dataset, classification_type="sentiment"):
     dataset = dataset.rename_column("test_case", "text")
     if classification_type == "sentiment":
         dataset = dataset.rename_column("functionality", "label")
-    elif classification_type == "multi":
+    elif classification_type == "hate":
         dataset = dataset.rename_column("target_ident", "label")
     return dataset
 
@@ -68,8 +68,8 @@ def data_pipeline(classification_type="sentiment", language="it", is_multi_lang_
     # tokenize text
     tokenizing_function = get_tokenizing_function(language, is_multi_lang_model)
     dataset = dataset.map(tokenizing_function)
-    # multi-class classification operations
-    if classification_type == "multi":
+    # hate classification operations
+    if classification_type == "hate":
         #drop NON_HATEFUL rows 
         dataset = dataset.filter(lambda example: example["functionality"] == "HATEFUL")
         # aggregate hate types

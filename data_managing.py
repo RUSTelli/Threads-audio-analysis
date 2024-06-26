@@ -75,7 +75,7 @@ def data_pipeline(classification_type="sentiment", language="it", is_multi_lang_
         # aggregate hate types
         dataset = dataset.map(_aggregate_hate_types)
     # rename columns    
-    dataset = _rename_columns(dataset, classification_type=classification_type)
+    dataset = _rename_columns(dataset, classification_type)
     # encode labels
     dataset = dataset.class_encode_column("label")
     # split the dataset into training, validation and test with a fixed seed of 42

@@ -1,43 +1,39 @@
 from transformers import AutoTokenizer
 from functools import partial
-from consts import TOKENIZER_CONFIG, MODELS
+from consts import MODELS, MAX_SEQ_LEN
 
 
-def get_tokenizer(language:str, multi_language_model = False):
+def get_tokenizer(language:str, is_multi_lang_model = False):
     """
     Returns the tokenizer used in the NLP models.
 
     Returns:
         AutoTokenizer: The tokenizer used in the NLP models.
     """
-    tokenizer_path = MODELS[language] if not multi_language_model else MODELS["multi"]
-    tokenizer = AutoTokenizer.from_pretrained(
-        tokenizer_path,
-        config=TOKENIZER_CONFIG,
-    )
-    return tokenizer
+    tokenizer_path = MODELS["multi"] if  is_multi_lang_model else MODELS[language]
+    return AutoTokenizer.from_pretrained(tokenizer_path)
 
 
-def generic_tokenizing_function(tokenizer: AutoTokenizer, examples):
+def _generic_tokenizing_function(tokenizer: AutoTokenizer, examples):
     """
-    Tokenizes the test_case column in the examples dataset.
+    Serves as base for tokenizing function (see below).
 
     Args:
-        examples (Dataset): The dataset containing the test_case column.
+        examples (Dataset): The dataset row.
 
     Returns:
-        Dataset: The dataset with the tokenized test_case column.
+        Dataset: the row with the tokenized test_case column.
     """
 
-    return tokenizer(examples["test_case"], truncation=True,  padding='max_length', max_length=150)
+    return tokenizer(examples["test_case"], truncation=True,  padding='max_length', max_length=MAX_SEQ_LEN)
 
 
 def get_tokenizing_function(language: str, multi_language_model = False):
     """
-    Returns the tokenizing function used in the NLP models.
+    Returns the specif-language tokenizing function used in data preparation.
 
     Returns:
-        function: The tokenizing function used in the NLP models.
+        function: Callable tokenizing function.
     """
     tokenizer = get_tokenizer(language, multi_language_model)
-    return partial(generic_tokenizing_function, tokenizer)
+    return partial(_generic_tokenizing_function, tokenizer)

@@ -61,13 +61,13 @@ BINARY_CLUSTER = {
 
 HATE_TYPES = {
     "TRANSPHOBIC" : {"trans people"},
-    "HOMOPHOBIC" : {"gay people"},
-    "GENERIC" : {},
-    "RELIGIOUS" :{"Muslims", "jews"},
-    "RACIAL" : {"black people"},
-    "MISOGYNY" : {"women"},
-    "DISABILITY" : {"disabled people"},
-    "XENOPHOBIC" : {"immigrants", "refugees", "indigenous people"},
+    "HOMOPHOBIC"  : {"gay people"},
+    "GENERIC"     : {},
+    "RELIGIOUS"   : {"Muslims", "jews"},
+    "RACIAL"      : {"black people"},
+    "MISOGYNY"    : {"women"},
+    "DISABILITY"  : {"disabled people"},
+    "XENOPHOBIC"  : {"immigrants", "refugees", "indigenous people"},
 }
 
 ID2LABEL_B = { 
@@ -101,3 +101,5 @@ LABEL2ID_M = {
     "XENOPHOBIC" : 6,
     "TRANSOPHOBIC" : 7,
 }
+
+MAX_SEQ_LEN = 512

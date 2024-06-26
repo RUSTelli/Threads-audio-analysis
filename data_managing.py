@@ -79,6 +79,12 @@ def data_pipeline(classification_type="sentiment", language="it", is_multi_lang_
     # encode labels
     dataset = dataset.class_encode_column("label")
     # split the dataset into training, validation and test with a fixed seed of 42
-    dataset = dataset.train_test_split(test_size=0.2, seed=42, stratify_by_column="label")
-
-    return dataset
+    dataset_split = dataset.train_test_split(test_size=0.2, seed=42, stratify_by_column="label")
+    # seprarate the training and validation datasets # 0.25 * 0.8 = 0.2
+    train_val_dataset = dataset_split['train'].train_test_split(test_size=0.25, seed=42, stratify_by_column="label") 
+    
+    train_dataset = train_val_dataset['train']
+    validation_dataset = train_val_dataset['test']
+    test_dataset = dataset_split['test']
+    
+    return train_dataset, validation_dataset, test_dataset    

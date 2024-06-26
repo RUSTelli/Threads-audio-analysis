@@ -6,17 +6,18 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 class HateClassifier():
     def __init__(self, model_path:str, language:str, is_multi_lang_model=False):
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+                    model_path,
+                    num_labels=8,
+                    id2label=ID2LABEL_M,
+                    label2id=LABEL2ID_M,
+                )
         self.tokenizer  = get_tokenizer(language, is_multi_lang_model)
-        self.output_dir = os.path.join("hate", language, model_path)
-        self.model      = AutoModelForSequenceClassification.from_pretrained(
-            model_path,
-            config=MODEL_CONFIGS[model_path],
-            num_labels=8,
-            id2label=ID2LABEL_M,
-            label2id=LABEL2ID_M,
-        )
+        lang            = "multi" if is_multi_lang_model else language
+        self.output_dir = os.path.join("hate", lang)
+        
 
-    def train(self, dataset, epochs=2, batch_size=16):
+    def train_and_test(self, train_dataset, eval_dataset, test_dataset, epochs=1, batch_size=16):
         def _compute_metrics(pred):
             labels = pred.label_ids
             preds = pred.predictions.argmax(-1)
@@ -26,7 +27,7 @@ class HateClassifier():
 
             # Calculate precision, recall, and F1-score
             precision = precision_score(labels, preds, average='micro')
-            recall = recall_score(labels, preds, average='micro')
+            recall = recall_score(labels, preds, average='micro', zero_division="warn")
             f1 = f1_score(labels, preds, average='micro')
             
             return {
@@ -52,10 +53,11 @@ class HateClassifier():
         trainer = Trainer(
             model=self.model,
             args=training_args,
-            train_dataset=dataset["train"],
-            eval_dataset=dataset["test"],
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
             tokenizer=self.tokenizer,
             compute_metrics=_compute_metrics,
         )
 
         trainer.train()
+        return trainer.predict(test_dataset)

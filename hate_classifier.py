@@ -1,8 +1,11 @@
-from transformers import AutoModelForSequenceClassification,Trainer, TrainingArguments
-from consts import LABEL2ID_M, ID2LABEL_M, MODEL_CONFIGS
-from tokenizer import get_tokenizer
-import os
+from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from torch import nn, argmax
+import os
+
+from consts import LABEL2ID_M, ID2LABEL_M, MAX_SEQ_LEN
+from tokenizer import get_tokenizer
+
 
 class HateClassifier():
     def __init__(self, model_path:str, language:str, is_multi_lang_model=False):
@@ -61,3 +64,11 @@ class HateClassifier():
 
         trainer.train()
         return trainer.predict(test_dataset)
+    
+
+    def predict(self, texts):
+        inputs = self.tokenizer(texts, padding=True, truncation=True, max_length=MAX_SEQ_LEN, return_tensors="pt")
+        outputs = self.model(**inputs)
+        probs = nn.functional.softmax(outputs.logits, dim=-1)
+        y = argmax(probs, dim=1)
+        return ID2LABEL_M[y.item()]

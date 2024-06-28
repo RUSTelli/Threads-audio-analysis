@@ -1,5 +1,5 @@
 from transformers import AutoModelForSequenceClassification,Trainer, TrainingArguments
-from scipy.special import softmax
+from torch import nn, argmax
 import numpy as np
 import evaluate
 import os
@@ -51,3 +51,11 @@ class SentimentClassifier():
 
         trainer.train()
         return trainer.predict(test_dataset)
+    
+
+    def predict(self, texts):
+        inputs = self.tokenizer(texts, padding=True, truncation=True, max_length=MAX_SEQ_LEN, return_tensors="pt")
+        outputs = self.model(**inputs)
+        probs = nn.functional.softmax(outputs.logits, dim=-1)
+        y = argmax(probs, dim=1)
+        return ID2LABEL_B[y.item()]

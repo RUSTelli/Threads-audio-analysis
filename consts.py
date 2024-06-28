@@ -71,12 +71,12 @@ HATE_TYPES = {
 }
 
 ID2LABEL_B = { 
-    0 : "NEGATIVE", 
+    0 : "HATEFUL", 
     1 : "NON-HATEFUL"
 }
 
 LABEL2ID_B = {
-    "NEGATIVE": 0, 
+    "HATEFUL": 0, 
     "NON-HATEFUL" : 1
 }
 
@@ -103,3 +103,6 @@ LABEL2ID_M = {
 }
 
 MAX_SEQ_LEN = 512
+
+SENTIMENT_WEIGHTS_PATH = ""
+HATE_WEIGHTS_PATH = ""

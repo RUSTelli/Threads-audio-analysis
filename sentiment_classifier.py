@@ -1,9 +1,11 @@
-from transformers import AutoModelForSequenceClassification,Trainer, TrainingArguments
+from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 from torch import nn, argmax
+import os
 import numpy as np
 import evaluate
-import os
-
 from consts import LABEL2ID_B, ID2LABEL_B, MAX_SEQ_LEN
 from tokenizer import get_tokenizer
 
@@ -16,9 +18,8 @@ class SentimentClassifier():
             label2id=LABEL2ID_B,
         )
         self.tokenizer  = get_tokenizer(language, is_multi_lang_model)
-        lang            = "multi" if is_multi_lang_model else language
-        self.output_dir = os.path.join("sentiment", lang)
-
+        self.lang            = "multi" if is_multi_lang_model else language
+        self.output_dir = os.path.join("sentiment", self.lang)
 
     def train_and_test(self, train_dataset, eval_dataset, test_dataset, epochs=2, batch_size=16):
         def _compute_metrics(eval_pred):
@@ -26,7 +27,29 @@ class SentimentClassifier():
             logits, labels = eval_pred
             predictions    = np.argmax(logits, axis=-1)
             return metrics.compute(predictions=predictions, references=labels)
-    
+
+        def _compute_confusion_matrix(predictions, save_as_png=True):
+            # Calculate confusion matrix
+            labels = predictions.label_ids
+            preds = predictions.predictions.argmax(-1)
+            cm = confusion_matrix(labels, preds)
+
+            # Plot confusion matrix
+            plt.figure(figsize=(10, 8))
+            sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", annot_kws={"fontsize": 20})
+            plt.xlabel("Predicted Labels")
+            plt.ylabel("True Labels")
+            plt.title("Confusion Matrix for "+ self.lang+" Hate Speech Classifier: "+str(epochs)+" epochs, batch size "+ str(batch_size), pad=20, fontsize=16)
+            plt.show()
+
+            # Save confusion matrix as PNG
+            if(save_as_png):
+                cm_filename = os.path.join(self.output_dir, "confusion_matrix_"+self.lang+".png")
+                plt.savefig(cm_filename)
+                plt.close()
+            else: 
+                plt.show()
+
         training_args = TrainingArguments(
             output_dir=self.output_dir,
             learning_rate=2e-5,
@@ -50,12 +73,16 @@ class SentimentClassifier():
         )
 
         trainer.train()
-        return trainer.predict(test_dataset)
-    
+        predictions = trainer.predict(test_dataset)
 
+        _compute_confusion_matrix(predictions)
+        
+        return predictions
+    
     def predict(self, texts):
         inputs = self.tokenizer(texts, padding=True, truncation=True, max_length=MAX_SEQ_LEN, return_tensors="pt")
         outputs = self.model(**inputs)
         probs = nn.functional.softmax(outputs.logits, dim=-1)
         y = argmax(probs, dim=1)
         return ID2LABEL_B[y.item()]
+

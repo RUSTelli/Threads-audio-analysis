@@ -95,7 +95,6 @@ class HateClassifier():
         
         return predictions
 
-
     def predict(self, texts):
         inputs = self.tokenizer(texts, padding=True, truncation=True, max_length=MAX_SEQ_LEN, return_tensors="pt")
         outputs = self.model(**inputs)

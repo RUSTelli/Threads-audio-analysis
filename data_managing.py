@@ -54,6 +54,18 @@ def _rename_columns(dataset, classification_type="sentiment"):
     return dataset
 
 def data_pipeline(classification_type="sentiment", language="it", is_multi_lang_model=False):
+    """
+    returns the train, validation and test datasets for the sentiment or hate type classification task.
+
+    Args: 
+        classification_type (str): The type of classification, can be "sentiment" or "hate".
+        language (str): The language of the dataset.
+        is_multi_lang_model (bool): to set True when using a multi-language model.
+
+    Returns:
+        training, validation and test datasets.
+    """
+
     disable_caching()
     # load dataset
     dataset = load_dataset(DATASETS[language], split="test")

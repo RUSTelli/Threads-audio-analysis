@@ -18,7 +18,7 @@ class SentimentClassifier():
             label2id=LABEL2ID_B,
         )
         self.tokenizer  = get_tokenizer(language, is_multi_lang_model)
-        self.lang            = "multi" if is_multi_lang_model else language
+        self.lang       = "multi" if is_multi_lang_model else language
         self.output_dir = os.path.join("sentiment", self.lang)
 
     def train_and_test(self, train_dataset, eval_dataset, test_dataset, epochs=2, batch_size=16):

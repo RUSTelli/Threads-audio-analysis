@@ -29,7 +29,7 @@ MODEL_CONFIGS = {
     "distilbert/distilbert-base-multilingual-cased" : os.path.join("configs", "multi_model_config.json"),
 }
 
-BINARY_CLUSTER = {
+SENTIMENT_AGGREGATION = {
     "HATEFUL" : {
         "threat_dir_h",
         "threat_norm_h",
@@ -59,7 +59,7 @@ BINARY_CLUSTER = {
     },
 }
 
-HATE_TYPES = {
+HATE_AGGREGATION = {
     "TRANSPHOBIC" : {"trans people"},
     "HOMOPHOBIC"  : {"gay people"},
     "GENERIC"     : {},

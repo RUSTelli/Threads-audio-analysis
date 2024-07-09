@@ -1,5 +1,5 @@
 from datasets import load_dataset, disable_caching
-from consts import HATE_TYPES, BINARY_CLUSTER, DATASETS
+from consts import HATE_AGGREGATION, SENTIMENT_AGGREGATION, DATASETS
 from tokenizer import get_tokenizing_function
 
 def _aggregate_functionalities(row):
@@ -13,7 +13,7 @@ def _aggregate_functionalities(row):
         dict: The modified row with aggregated functionality.
     """
     functionality = row['functionality']
-    for sentiment, functionalities in BINARY_CLUSTER.items():
+    for sentiment, functionalities in SENTIMENT_AGGREGATION.items():
         if functionality in functionalities:
             row['functionality'] = sentiment
     return row
@@ -30,7 +30,7 @@ def _aggregate_hate_types(row):
     """
     target_identity = row['target_ident']
     row['target_ident'] = 'GENERIC'  
-    for hate_type, targets in HATE_TYPES.items():
+    for hate_type, targets in HATE_AGGREGATION.items():
         if target_identity in targets:
             row['target_ident'] = hate_type
     return row

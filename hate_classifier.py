@@ -11,13 +11,13 @@ from tokenizer import get_tokenizer
 class HateClassifier():
     def __init__(self, model_path:str, language:str, is_multi_lang_model=False):
         self.model = AutoModelForSequenceClassification.from_pretrained(
-                    model_path,
-                    num_labels=8,
-                    id2label=ID2LABEL_M,
-                    label2id=LABEL2ID_M,
-                )
+            model_path,
+            num_labels=8,
+            id2label=ID2LABEL_M,
+            label2id=LABEL2ID_M,
+        )
         self.tokenizer  = get_tokenizer(language, is_multi_lang_model)
-        self.lang            = "multi" if is_multi_lang_model else language
+        self.lang       = "multi" if is_multi_lang_model else language
         self.output_dir = os.path.join("hate", self.lang)
         
 
